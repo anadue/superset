@@ -1,0 +1,88 @@
+{
+  "_args": [
+    [
+      "@anadue_npmadmin/legacy-preset-chart-deckgl-anadue@0.4.4",
+      "/app/superset-frontend"
+    ]
+  ],
+  "_from": "@anadue_npmadmin/legacy-preset-chart-deckgl-anadue@^0.4.4",
+  "_id": "@anadue_npmadmin/legacy-preset-chart-deckgl-anadue@0.4.4",
+  "_inBundle": false,
+  "_integrity": "sha512-xlG5tKB1H2eJrctqmqTyHuDfK5femdVByvprIKJsNo6wTTfG0imUY3NbuPQ4yXl353i8iqJw0lbGKsUO3IzzSA==",
+  "_location": "/@anadue_npmadmin/legacy-preset-chart-deckgl-anadue",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "range",
+    "registry": true,
+    "raw": "@anadue_npmadmin/legacy-preset-chart-deckgl-anadue@^0.4.4",
+    "name": "@anadue_npmadmin/legacy-preset-chart-deckgl-anadue",
+    "escapedName": "@anadue_npmadmin%2flegacy-preset-chart-deckgl-anadue",
+    "scope": "@anadue_npmadmin",
+    "rawSpec": "^0.4.4",
+    "saveSpec": null,
+    "fetchSpec": "^0.4.4"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/@anadue_npmadmin/legacy-preset-chart-deckgl-anadue/-/legacy-preset-chart-deckgl-anadue-0.4.4.tgz",
+  "_shasum": "3ee54a85fd58391bcffc2381c17ae2afcdd8f6a1",
+  "_spec": "@anadue_npmadmin/legacy-preset-chart-deckgl-anadue@^0.4.4",
+  "_where": "/app/superset-frontend",
+  "author": {
+    "name": "Superset"
+  },
+  "bugs": {
+    "url": "https://github.com/apache-superset/superset-ui-plugins-deckgl/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "@math.gl/web-mercator": "^3.2.2",
+    "@types/d3-array": "^2.0.0",
+    "bootstrap-slider": "^10.0.0",
+    "d3-array": "^1.2.4",
+    "d3-color": "^1.2.0",
+    "d3-scale": "^2.1.2",
+    "deck.gl": "7.1.11",
+    "jquery": "^3.4.1",
+    "lodash": "^4.17.15",
+    "mapbox-gl": "^0.53.0",
+    "moment": "^2.20.1",
+    "mousetrap": "^1.6.1",
+    "prop-types": "^15.6.0",
+    "react-bootstrap-slider": "2.1.5",
+    "react-map-gl": "^4.0.10",
+    "underscore": "^1.8.3",
+    "urijs": "^1.18.10",
+    "xss": "^1.0.6"
+  },
+  "deprecated": false,
+  "description": "Superset Legacy Chart - deck.gl",
+  "files": [
+    "esm",
+    "lib"
+  ],
+  "gitHead": "9cbd0f2cffb58d468bbd2d0a9205582867f791d8",
+  "homepage": "https://github.com/apache-superset/superset-ui-plugins-deckgl#readme",
+  "keywords": [
+    "superset"
+  ],
+  "license": "Apache-2.0",
+  "main": "lib/index.js",
+  "module": "esm/index.js",
+  "name": "@anadue_npmadmin/legacy-preset-chart-deckgl-anadue",
+  "peerDependencies": {
+    "@superset-ui/chart-controls": "^0.16.3",
+    "@superset-ui/core": "^0.16.3",
+    "react": "^15 || ^16"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/apache-superset/superset-ui-plugins-deckgl.git"
+  },
+  "sideEffects": true,
+  "version": "0.4.4"
+}
