@@ -18,15 +18,15 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Input, Row, Col } from 'src/common/components';
-import { Behavior, t, getChartMetadataRegistry } from '@superset-ui/core';
+import { Row, Col, FormControl } from 'react-bootstrap';
+import { t, getChartMetadataRegistry } from '@superset-ui/core';
 import { useDynamicPluginContext } from 'src/components/DynamicPlugins';
-import Modal from 'src/components/Modal';
-import { Tooltip } from 'src/components/Tooltip';
+import { Tooltip } from 'src/common/components/Tooltip';
+import Modal from 'src/common/components/Modal';
 import Label from 'src/components/Label';
-import ControlHeader from 'src/explore/components/ControlHeader';
+
+import ControlHeader from '../ControlHeader';
 import './VizTypeControl.less';
-import { FeatureFlag, isFeatureEnabled } from 'src/featureFlags';
 
 const propTypes = {
   description: PropTypes.string,
@@ -34,16 +34,17 @@ const propTypes = {
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func,
   value: PropTypes.string.isRequired,
-  labelType: PropTypes.string,
+  labelBsStyle: PropTypes.string,
 };
 
 const defaultProps = {
   onChange: () => {},
-  labelType: 'default',
+  labelBsStyle: 'default',
 };
 
 const registry = getChartMetadataRegistry();
 
+const IMAGE_PER_ROW = 6;
 const DEFAULT_ORDER = [
   'line',
   'big_number',
@@ -84,11 +85,13 @@ const DEFAULT_ORDER = [
   'partition',
   'event_flow',
   'deck_path',
-  'graph_chart',
+  'directed_force',
   'world_map',
   'paired_ttest',
   'para',
   'country_map',
+
+  'deck_arc_anadue', //  Anadue Arc
 ];
 
 const typesWithDefaultOrder = new Set(DEFAULT_ORDER);
@@ -106,11 +109,6 @@ function VizSupportValidation({ vizType }) {
   );
 }
 
-const nativeFilterGate = behaviors =>
-  !behaviors.includes(Behavior.NATIVE_FILTER) ||
-  (isFeatureEnabled(FeatureFlag.DASHBOARD_CROSS_FILTERS) &&
-    behaviors.includes(Behavior.INTERACTIVE_CHART));
-
 const VizTypeControl = props => {
   const [showModal, setShowModal] = useState(false);
   const [filter, setFilter] = useState('');
@@ -118,7 +116,7 @@ const VizTypeControl = props => {
 
   useEffect(() => {
     if (showModal) {
-      setTimeout(() => searchRef?.current?.focus(), 200);
+      searchRef?.current?.focus();
     }
   }, [showModal]);
 
@@ -133,6 +131,12 @@ const VizTypeControl = props => {
 
   const changeSearch = event => {
     setFilter(event.target.value);
+  };
+
+  const focusSearch = () => {
+    if (searchRef) {
+      searchRef.focus();
+    }
   };
 
   const renderItem = entry => {
@@ -154,20 +158,18 @@ const VizTypeControl = props => {
           src={type.thumbnail}
         />
         <div className="viztype-label" data-test="viztype-label">
-          {type.name}
+          {type.name} 
         </div>
       </div>
     );
   };
+	// <!--  Anadue Changes-->
 
-  const { value, labelType } = props;
+  const { value, labelBsStyle } = props;
   const filterString = filter.toLowerCase();
 
   const filteredTypes = DEFAULT_ORDER.filter(type => registry.has(type))
-    .filter(type => {
-      const behaviors = registry.get(type)?.behaviors || [];
-      return nativeFilterGate(behaviors);
-    })
+    .filter(type => !registry.get(type).isNativeFilter)
     .map(type => ({
       key: type,
       value: registry.get(type),
@@ -175,13 +177,23 @@ const VizTypeControl = props => {
     .concat(
       registry
         .entries()
-        .filter(entry => {
-          const behaviors = entry.value?.behaviors || [];
-          return nativeFilterGate(behaviors);
-        })
+        .filter(entry => !entry.value.isNativeFilter)
         .filter(({ key }) => !typesWithDefaultOrder.has(key)),
     )
     .filter(entry => entry.value.name.toLowerCase().includes(filterString));
+
+  const rows = [];
+  for (let i = 0; i <= filteredTypes.length; i += IMAGE_PER_ROW) {
+    rows.push(
+      <Row data-test="viz-row" key={`row-${i}`}>
+        {filteredTypes.slice(i, i + IMAGE_PER_ROW).map(entry => (
+          <Col md={12 / IMAGE_PER_ROW} key={`grid-col-${entry.key}`}>
+            {renderItem(entry)}
+          </Col>
+        ))}
+      </Row>,
+    );
+  }
 
   return (
     <div>
@@ -192,12 +204,8 @@ const VizTypeControl = props => {
         title={t('Click to change visualization type')}
       >
         <>
-          <Label
-            onClick={toggleModal}
-            type={labelType}
-            data-test="visualization-type"
-          >
-            {registry.has(value) ? registry.get(value).name : `${value}`}
+          <Label onClick={toggleModal} bsStyle={labelBsStyle}>
+            {registry.has(value) ? registry.get(value).name : `${value}`} 
           </Label>
           <VizSupportValidation vizType={value} />
         </>
@@ -205,27 +213,24 @@ const VizTypeControl = props => {
       <Modal
         show={showModal}
         onHide={toggleModal}
+        onEnter={focusSearch}
         title={t('Select a visualization type')}
         responsive
         hideFooter
         forceRender
       >
         <div className="viztype-control-search-box">
-          <Input
-            ref={searchRef}
+          <FormControl
+            inputRef={ref => {
+              searchRef.current = ref;
+            }}
             type="text"
             value={filter}
             placeholder={t('Search')}
             onChange={changeSearch}
           />
         </div>
-        <Row data-test="viz-row" gutter={16}>
-          {filteredTypes.map(entry => (
-            <Col xs={12} sm={8} md={6} lg={4} key={`grid-col-${entry.key}`}>
-              {renderItem(entry)}
-            </Col>
-          ))}
-        </Row>
+        {rows}
       </Modal>
     </div>
   );
