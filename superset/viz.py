@@ -2507,6 +2507,58 @@ class DeckScatterViz(BaseDeckGLViz):
         return super().get_data(df)
 
 
+
+class DeckScatterVizAnadue(BaseDeckGLViz):
+
+    """deck.gl's ScatterLayer"""
+
+    viz_type = "deck_scatter_anadue"
+    verbose_name = _("Deck.gl - Scatter plot")
+    spatial_control_keys = ["spatial"]
+    is_timeseries = True
+
+    def query_obj(self) -> QueryObjectDict:
+        fd = self.form_data
+        self.is_timeseries = bool(fd.get("time_grain_sqla") or fd.get("granularity"))
+        self.point_radius_fixed = fd.get("point_radius_fixed") or {
+            "type": "fix",
+            "value": 500,
+        }
+        return super().query_obj()
+
+    def get_metrics(self) -> List[str]:
+        self.metric = None
+        if self.point_radius_fixed.get("type") == "metric":
+            self.metric = self.point_radius_fixed["value"]
+            return [self.metric]
+        return []
+
+    def get_properties(self, d: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            "metric": d.get(self.metric_label) if self.metric_label else None,
+            "radius": self.fixed_value
+            if self.fixed_value
+            else d.get(self.metric_label)
+            if self.metric_label
+            else None,
+            "cat_color": d.get(self.dim) if self.dim else None,
+            "position": d.get("spatial"),
+            DTTM_ALIAS: d.get(DTTM_ALIAS),
+        }
+
+    def get_data(self, df: pd.DataFrame) -> VizData:
+        fd = self.form_data
+        self.metric_label = utils.get_metric_name(self.metric) if self.metric else None
+        self.point_radius_fixed = fd.get("point_radius_fixed")
+        self.fixed_value = None
+        self.dim = self.form_data.get("dimension")
+        if self.point_radius_fixed and self.point_radius_fixed.get("type") != "metric":
+            self.fixed_value = self.point_radius_fixed.get("value")
+        return super().get_data(df)
+
+
+
+
 class DeckScreengrid(BaseDeckGLViz):
 
     """deck.gl's ScreenGridLayer"""
@@ -2531,6 +2583,33 @@ class DeckScreengrid(BaseDeckGLViz):
     def get_data(self, df: pd.DataFrame) -> VizData:
         self.metric_label = utils.get_metric_name(self.metric) if self.metric else None
         return super().get_data(df)
+
+
+class DeckScreengridAnadue(BaseDeckGLViz):
+
+    """deck.gl's ScreenGridLayer"""
+
+    viz_type = "deck_screengrid_anadue"
+    verbose_name = _("Deck.gl - Screen Grid")
+    spatial_control_keys = ["spatial"]
+    is_timeseries = True
+
+    def query_obj(self) -> QueryObjectDict:
+        fd = self.form_data
+        self.is_timeseries = bool(fd.get("time_grain_sqla") or fd.get("granularity"))
+        return super().query_obj()
+
+    def get_properties(self, d: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            "position": d.get("spatial"),
+            "weight": (d.get(self.metric_label) if self.metric_label else None) or 1,
+            "__timestamp": d.get(DTTM_ALIAS) or d.get("__time"),
+        }
+
+    def get_data(self, df: pd.DataFrame) -> VizData:
+        self.metric_label = utils.get_metric_name(self.metric) if self.metric else None
+        return super().get_data(df)
+
 
 
 class DeckGrid(BaseDeckGLViz):
@@ -2561,6 +2640,38 @@ def geohash_to_json(geohash_code: str) -> List[List[float]]:
         [p.get("w"), p.get("s")],
         [p.get("w"), p.get("n")],
     ]
+
+
+class DeckGridAnadue(BaseDeckGLViz):
+
+    """deck.gl's DeckLayer"""
+
+    viz_type = "deck_grid_anadue"
+    verbose_name = _("Deck.gl - 3D Grid")
+    spatial_control_keys = ["spatial"]
+
+    def get_properties(self, d: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            "position": d.get("spatial"),
+            "weight": (d.get(self.metric_label) if self.metric_label else None) or 1,
+        }
+
+    def get_data(self, df: pd.DataFrame) -> VizData:
+        self.metric_label = utils.get_metric_name(self.metric) if self.metric else None
+        return super().get_data(df)
+
+
+def geohash_to_json(geohash_code: str) -> List[List[float]]:
+    p = geohash.bbox(geohash_code)
+    return [
+        [p.get("w"), p.get("n")],
+        [p.get("e"), p.get("n")],
+        [p.get("e"), p.get("s")],
+        [p.get("w"), p.get("s")],
+        [p.get("w"), p.get("n")],
+    ]
+
+
 
 
 class DeckPathViz(BaseDeckGLViz):
@@ -2610,6 +2721,55 @@ class DeckPathViz(BaseDeckGLViz):
         return super().get_data(df)
 
 
+class DeckPathVizAnadue(BaseDeckGLViz):
+
+    """deck.gl's PathLayer"""
+
+    viz_type = "deck_path_anadue"
+    verbose_name = _("Deck.gl - Paths")
+    deck_viz_key = "path"
+    is_timeseries = True
+    deser_map = {
+        "json": json.loads,
+        "polyline": polyline.decode,
+        "geohash": geohash_to_json,
+    }
+
+    def query_obj(self) -> QueryObjectDict:
+        fd = self.form_data
+        self.is_timeseries = bool(fd.get("time_grain_sqla") or fd.get("granularity"))
+        d = super().query_obj()
+        self.metric = fd.get("metric")
+        line_col = fd.get("line_column")
+        if d["metrics"]:
+            self.has_metrics = True
+            d["groupby"].append(line_col)
+        else:
+            self.has_metrics = False
+            d["columns"].append(line_col)
+        return d
+
+    def get_properties(self, d: Dict[str, Any]) -> Dict[str, Any]:
+        fd = self.form_data
+        line_type = fd["line_type"]
+        deser = self.deser_map[line_type]
+        line_column = fd["line_column"]
+        path = deser(d[line_column])
+        if fd.get("reverse_long_lat"):
+            path = [(o[1], o[0]) for o in path]
+        d[self.deck_viz_key] = path
+        if line_type != "geohash":
+            del d[line_column]
+        d["__timestamp"] = d.get(DTTM_ALIAS) or d.get("__time")
+        return d
+
+    def get_data(self, df: pd.DataFrame) -> VizData:
+        self.metric_label = utils.get_metric_name(self.metric) if self.metric else None
+        return super().get_data(df)
+
+
+
+
 class DeckPolygon(DeckPathViz):
 
     """deck.gl's Polygon Layer"""
@@ -2640,6 +2800,40 @@ class DeckPolygon(DeckPathViz):
         return d
 
 
+
+class DeckPolygonAnadue(DeckPathViz):
+
+    """deck.gl's Polygon Layer"""
+
+    viz_type = "deck_polygon_anadue"
+    deck_viz_key = "polygon"
+    verbose_name = _("Deck.gl - Polygon")
+
+    def query_obj(self) -> QueryObjectDict:
+        fd = self.form_data
+        self.elevation = fd.get("point_radius_fixed") or {"type": "fix", "value": 500}
+        return super().query_obj()
+
+    def get_metrics(self) -> List[str]:
+        metrics = [self.form_data.get("metric")]
+        if self.elevation.get("type") == "metric":
+            metrics.append(self.elevation.get("value"))
+        return [metric for metric in metrics if metric]
+
+    def get_properties(self, d: Dict[str, Any]) -> Dict[str, Any]:
+        super().get_properties(d)
+        fd = self.form_data
+        elevation = fd["point_radius_fixed"]["value"]
+        type_ = fd["point_radius_fixed"]["type"]
+        d["elevation"] = (
+            d.get(utils.get_metric_name(elevation)) if type_ == "metric" else elevation
+        )
+        return d
+
+
+
+
+
 class DeckHex(BaseDeckGLViz):
 
     """deck.gl's DeckLayer"""
@@ -2659,6 +2853,28 @@ class DeckHex(BaseDeckGLViz):
         return super(DeckHex, self).get_data(df)
 
 
+
+class DeckHexAnadue(BaseDeckGLViz):
+
+    """deck.gl's DeckLayer"""
+
+    viz_type = "deck_hex_anadue"
+    verbose_name = _("Deck.gl - 3D HEX")
+    spatial_control_keys = ["spatial"]
+
+    def get_properties(self, d: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            "position": d.get("spatial"),
+            "weight": (d.get(self.metric_label) if self.metric_label else None) or 1,
+        }
+
+    def get_data(self, df: pd.DataFrame) -> VizData:
+        self.metric_label = utils.get_metric_name(self.metric) if self.metric else None
+        return super(DeckHex, self).get_data(df)
+
+
+
+
 class DeckGeoJson(BaseDeckGLViz):
 
     """deck.gl's GeoJSONLayer"""
@@ -2676,6 +2892,29 @@ class DeckGeoJson(BaseDeckGLViz):
     def get_properties(self, d: Dict[str, Any]) -> Dict[str, Any]:
         geojson = d[self.form_data["geojson"]]
         return json.loads(geojson)
+
+
+
+class DeckGeoJsonAnadue(BaseDeckGLViz):
+
+    """deck.gl's GeoJSONLayer"""
+
+    viz_type = "deck_geojson_anadue"
+    verbose_name = _("Deck.gl - GeoJSON")
+
+    def query_obj(self) -> QueryObjectDict:
+        d = super().query_obj()
+        d["columns"] += [self.form_data.get("geojson")]
+        d["metrics"] = []
+        d["groupby"] = []
+        return d
+
+    def get_properties(self, d: Dict[str, Any]) -> Dict[str, Any]:
+        geojson = d[self.form_data["geojson"]]
+        return json.loads(geojson)
+
+
+
 
 
 class DeckArc(BaseDeckGLViz):
@@ -2711,6 +2950,46 @@ class DeckArc(BaseDeckGLViz):
             "features": d["features"],  # type: ignore
             "mapboxApiKey": config["MAPBOX_API_KEY"],
         }
+
+
+
+class DeckArcAnadue(BaseDeckGLViz):
+
+    """deck.gl's Arc Layer"""
+
+    viz_type = "deck_arc_anadue"
+    verbose_name = _("Deck.gl - Arc")
+    spatial_control_keys = ["start_spatial", "end_spatial"]
+    is_timeseries = True
+
+    def query_obj(self) -> QueryObjectDict:
+        fd = self.form_data
+        self.is_timeseries = bool(fd.get("time_grain_sqla") or fd.get("granularity"))
+        return super().query_obj()
+
+    def get_properties(self, d: Dict[str, Any]) -> Dict[str, Any]:
+        dim = self.form_data.get("dimension")
+        return {
+            "sourcePosition": d.get("start_spatial"),
+            "targetPosition": d.get("end_spatial"),
+            "cat_color": d.get(dim) if dim else None,
+            DTTM_ALIAS: d.get(DTTM_ALIAS),
+        }
+
+    def get_data(self, df: pd.DataFrame) -> VizData:
+        if df.empty:
+            return None
+
+        d = super().get_data(df)
+
+        return {
+            "features": d["features"],  # type: ignore
+            "mapboxApiKey": config["MAPBOX_API_KEY"],
+        }
+
+
+
+
 
 
 class EventFlowViz(BaseViz):

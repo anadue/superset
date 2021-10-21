@@ -183,6 +183,7 @@ export class ExploreChartHeader extends React.PureComponent {
               )}
             </StyledButtons>
           )}
+
         </div>
         <div className="right-button-panel">
           {chartFinished && queryResponse && (
@@ -218,6 +219,7 @@ export class ExploreChartHeader extends React.PureComponent {
         </div>
       </StyledHeader>
     );
+    // <!-- Ajay added to verify Html Anadue-->
   }
 }
 

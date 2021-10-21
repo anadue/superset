@@ -90,6 +90,8 @@ const DEFAULT_ORDER = [
   'paired_ttest',
   'para',
   'country_map',
+
+  'deck_arc_anadue', //  Anadue Arc
 ];
 
 const typesWithDefaultOrder = new Set(DEFAULT_ORDER);
@@ -156,11 +158,12 @@ const VizTypeControl = props => {
           src={type.thumbnail}
         />
         <div className="viztype-label" data-test="viztype-label">
-          {type.name}
+          {type.name} 
         </div>
       </div>
     );
   };
+	// <!--  Anadue Changes-->
 
   const { value, labelBsStyle } = props;
   const filterString = filter.toLowerCase();
@@ -202,7 +205,7 @@ const VizTypeControl = props => {
       >
         <>
           <Label onClick={toggleModal} bsStyle={labelBsStyle}>
-            {registry.has(value) ? registry.get(value).name : `${value}`}
+            {registry.has(value) ? registry.get(value).name : `${value}`} 
           </Label>
           <VizSupportValidation vizType={value} />
         </>

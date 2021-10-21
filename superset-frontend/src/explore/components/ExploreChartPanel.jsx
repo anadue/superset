@@ -196,10 +196,12 @@ const ExploreChartPanel = props => {
     );
   }, [calcSectionHeight, chartWidth, props, splitSizes]);
 
+	// <!-- Anadue  reaching to Chart Map Anadue -->
+	
   const panelBody = useMemo(
     () => (
       <div className="panel-body" ref={chartRef}>
-        {renderChart()}
+	  {renderChart()} 
       </div>
     ),
     [chartRef, renderChart],

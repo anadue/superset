@@ -53,7 +53,14 @@ import {
   LineMultiChartPlugin,
   TimePivotChartPlugin,
 } from '@superset-ui/legacy-preset-chart-nvd3';
-import { DeckGLChartPreset } from '@superset-ui/legacy-preset-chart-deckgl';
+//import { DeckGLChartPreset } from '@superset-ui/legacy-preset-chart-deckgl';
+
+//import StatusChartPlugin from '@superset-viz-plugins/plugin-chart-status'; // Test code Anadue
+import StatusChartPlugin from '@anadue_npmadmin/plugin-chart-status'; // Test code Anadue
+
+import { DeckGLChartPresetAnadue } from '@anadue_npmadmin/legacy-preset-chart-deckgl-anadue'; // Anadue  changes
+
+
 import {
   EchartsPieChartPlugin,
   EchartsBoxPlotChartPlugin,
@@ -70,8 +77,9 @@ export default class MainPreset extends Preset {
   constructor() {
     super({
       name: 'Legacy charts',
-      presets: [new DeckGLChartPreset()],
+      presets: [new DeckGLChartPresetAnadue()],
       plugins: [
+//	      new ArcChartPluginAnadue().configure({ key: 'deck_arc_anadue' }),  //ajay anadue changes
         new AreaChartPlugin().configure({ key: 'area' }),
         new BarChartPlugin().configure({ key: 'bar' }),
         new BigNumberChartPlugin().configure({ key: 'big_number' }),
@@ -113,6 +121,8 @@ export default class MainPreset extends Preset {
         }),
         new AntdSelectFilterPlugin().configure({ key: 'filter_select' }),
         new AntdRangeFilterPlugin().configure({ key: 'filter_range' }),
+
+	new StatusChartPlugin().configure({ key: 'anadue-oss-status' })
       ],
     });
   }

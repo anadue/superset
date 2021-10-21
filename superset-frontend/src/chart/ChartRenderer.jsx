@@ -83,6 +83,8 @@ class ChartRenderer extends React.Component {
       !nextProps.queriesResponse?.[0]?.error &&
       !nextProps.refreshOverlayVisible;
 
+console.log(nextProps, resultsReady, 'Test by Anadue');
+
     if (resultsReady) {
       this.hasQueryResponseChange =
         nextProps.queriesResponse !== this.props.queriesResponse;
@@ -96,7 +98,15 @@ class ChartRenderer extends React.Component {
         nextProps.cacheBusterProp !== this.props.cacheBusterProp
       );
     }
-    return false;
+
+//	  alert(nextProps.vizType);
+
+    //return true; /// previously "false", modified by Anadue;
+	if( nextProps.vizType == "deck_polygon" || nextProps.vizType == 'deck_arc_anadue') {
+     	   return true;
+   	 } else {
+     	   return false;
+         }
   }
 
   handleAddFilter(col, vals, merge = true, refresh = true) {
@@ -161,6 +171,7 @@ class ChartRenderer extends React.Component {
     } = this.props;
 
     // Skip chart rendering
+
     if (
       refreshOverlayVisible ||
       chartStatus === 'loading' ||

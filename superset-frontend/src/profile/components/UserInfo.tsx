@@ -46,7 +46,7 @@ export default function UserInfo({ user }: UserInfoProps) {
         <Panel.Body>
           <h3>
             <strong>
-              {user.firstName} {user.lastName}
+             {user.firstName} {user.lastName}
             </strong>
           </h3>
           <h4 className="username">

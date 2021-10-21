@@ -56,6 +56,7 @@ export default class ControlPanelSection extends React.Component {
     this.setState(prevState => ({ expanded: !prevState.expanded }));
   }
 
+	//Anadue accordian menu info
   renderHeader() {
     const { label, description, hasErrors } = this.props;
     return (
@@ -68,7 +69,7 @@ export default class ControlPanelSection extends React.Component {
               tabIndex={0}
               onClick={this.toggleExpand}
             >
-              {label}
+              {label} 
             </span>{' '}
             {description && (
               <InfoTooltipWithTrigger label={label} tooltip={description} />
