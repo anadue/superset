@@ -173,7 +173,10 @@
     "rison": "^0.1.1",
     "shortid": "^2.2.6",
     "urijs": "^1.18.10",
-    "use-query-params": "^1.1.9"
+    "use-query-params": "^1.1.9",
+    "@superset-viz-plugins/plugin-chart-status": "~0.0.0",
+    "@anadue_npmadmin/plugin-chart-status": "~0.0.7",
+    "@anadue_npmadmin/legacy-preset-chart-deckgl-anadue": "^0.4.4"
   },
   "devDependencies": {
     "@babel/cli": "^7.12.10",
@@ -298,7 +301,10 @@
     "webpack-dev-server": "^3.11.0",
     "webpack-manifest-plugin": "^2.2.0",
     "webpack-sources": "^1.4.3",
-    "yargs": "^15.4.1"
+    "yargs": "^15.4.1",
+    "@superset-viz-plugins/plugin-chart-status": "~0.0.0",
+    "@anadue_npmadmin/plugin-chart-status": "~0.0.7",
+    "@anadue_npmadmin/legacy-preset-chart-deckgl-anadue": "^0.4.4"
   },
   "stylelint": {
     "rules": {
