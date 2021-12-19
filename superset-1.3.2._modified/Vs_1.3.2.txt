@@ -1,0 +1,60 @@
+These are the set of steps for merging Anadue modified code in superset version 1.3.2.
+
+1) Download superset code from Github: https://github.com/apache/superset/releases/tag/1.3.2 (Fresh Copy of 1.3.2 version)
+2) Extract the zip file and go to  superset_1.3.2 folder.
+3) Cleaning of the Volumes, Images and Containers
+
+docker rm -vf $(docker ps -a -q)
+docker rmi -f $(docker images -a -q)
+docker image prune --all --force
+docker system prune -a --volumes
+
+
+4) Modify file docker-compose.yml...
+find the line with
+x-superset-image: &superset-image apache/superset:latest-dev
+change to
+x-superset-image: &superset-image anadue-superset:v0.1
+
+5) Run Command
+docker build -t anadue-superset:v0.1 .
+
+
+6) Run command
+docker-compose up --build
+
+
+7) After build is successful, we have to manually copy Anadue modified code  in current version of superset code
+
+Github : https://github.com/anadue/superset.git
+branch : legacy-preset-chart-deckgl-anadue
+
+8)Download the github code in a seperate folder using command:
+git clone -b legacy-preset-chart-deckgl-anadue https://github.com/anadue/superset.git
+
+
+Copy Files from downloaded superset-1.3.2_modified folder to your local superset-1.3.2
+
+// Python - Superset API file
+cp viz.py superset-1.3.2/superset/
+cp config.py superset-1.3.2/superset/
+cp __init__.py superset-1.3.2/superset/initialization/__init__.py
+
+
+// superset-frontend - package json for fetching libraries
+cp package.json superset-1.3.2/superset-frontend/
+// superset-frontend - ChartRenderer file for map repositioning.
+cp ChartRenderer.jsx superset-1.3.2/superset-frontend/src/chart/
+// Adding library controls
+cp VizTypeControl.tsx superset-1.3.2/superset-frontend/src/explore/components/controls/VizTypeControl/
+// Adding customized Anadue libraries
+cp MainPreset.js superset-1.3.2/superset-frontend/src/visualizations/presets/
+// Modifying deckgl library for arc width
+cp arc-layer.js superset-frontend/node_modules/@deck.gl/layers/dist/esm/arc-layer/
+
+
+Once copying  is successful, Application is ready to be Tested
+
+9)
+  docker-compose down
+  docker-compose up
